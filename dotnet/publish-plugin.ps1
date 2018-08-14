@@ -18,24 +18,23 @@ Remove-Item $OutputDirectory -Force -Recurse
 $ReSharperPackageFile = Get-ChildItem "$OutputDirectory\SamplePlugin.ReSharper.*.nupkg"
 
 $RiderOutputDirectory = "$OutputDirectory\rider-SamplePlugin"
-$PluginXmlFile = "$RiderOutputDirectory\META-INF\plugin.xml"
-mkdir "$RiderOutputDirectory"
+$RiderPluginXml = [xml] (Get-Content "$PSScriptRoot\src\plugin.xml")
+$RiderPluginId = $RiderPluginXml."idea-plugin".id
+
+mkdir "$RiderOutputDirectory" > $null
 mkdir "$RiderOutputDirectory\dotnet" > $null
 Copy-Item -Path "$PSScriptRoot\src\SamplePlugin.ReSharper\bin\SamplePlugin.Rider\$Configuration\SamplePlugin.Rider.*" -Destination "$RiderOutputDirectory\dotnet"
+
+$WaveSpec = ([xml] (Get-Content "$PSScriptRoot\src\Versions.props")).Project.PropertyGroup.SdkVersion
+$WaveSpec = "$($WaveSpec.Substring(2,2))$($WaveSpec.Substring(5,1))"
+$RiderPluginXml."idea-plugin".version = $Version
+$RiderPluginXml."idea-plugin"."idea-version".setAttribute("since-build", "$WaveSpec.0")
+$RiderPluginXml."idea-plugin"."idea-version".setAttribute("until-build", "$WaveSpec.*")
 mkdir "$RiderOutputDirectory\META-INF" > $null
-Copy-Item -Path "$PSScriptRoot\src\plugin.xml" -Destination "$PluginXmlFile"
+$RiderPluginXml.Save("$RiderOutputDirectory\META-INF\plugin.xml")
 
+$RiderPackageFile = "$OutputDirectory\rider-SamplePlugin.zip"
+& "$PSScriptRoot\..\tools\7za.exe" a "$RiderPackageFile" "$RiderOutputDirectory" > $null
 
-$pluginXml = [xml] (Get-Content "$PluginXmlFile")
-$waveSpec = ([xml] (Get-Content "$PSScriptRoot\src\Versions.props")).Project.PropertyGroup.SdkVersion
-$waveSpec = "$($waveSpec.Substring(2,2))$($waveSpec.Substring(5,1))"
-$pluginXml."idea-plugin".version = $Version
-$pluginXml."idea-plugin"."idea-version".setAttribute("since-build", "$waveSpec.0")
-$pluginXml."idea-plugin"."idea-version".setAttribute("until-build", "$waveSpec.*")
-$pluginXml.Save("$PluginXmlFile")
-
-exit
-& "$PSScriptRoot\..\tools\7za.exe" a "$OutputDirectory\rider-SamplePlugin.zip" "$RiderOutputDirectory"
-
-Write-Host dotnet nuget push $ReSharperPackageFile --source "https://resharper-plugins.jetbrains.com/api/v2/package" --api-key $ApiKey
-Write-Host java -jar "$PSScriptRoot\..\tools\plugin-repository-rest-client.jar" upload -file "$OutputDirectory\rider-SamplePlugin.zip" -plugin rider-SamplePlugin -username $RiderUsername -password $RiderPassword
+Write-Host dotnet nuget push $ReSharperPackageFile --source "https://resharper-plugins.jetbrains.com/api/v2/package" --api-key $ReSharperApiKey
+Write-Host java -jar "$PSScriptRoot\..\tools\plugin-repository-rest-client.jar" upload -file "$RiderPackageFile" -plugin "$RiderPluginId" -username $RiderUsername -password $RiderPassword

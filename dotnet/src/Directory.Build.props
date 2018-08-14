@@ -4,5 +4,6 @@
     <DefaultItemExcludes>$(DefaultItemExcludes);obj\**</DefaultItemExcludes>
     <RootNamespace>ReSharper.SamplePlugin</RootNamespace>
     <OutputPath>bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 </Project>
