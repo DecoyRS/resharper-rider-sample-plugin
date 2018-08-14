@@ -1,9 +1,31 @@
-$RootSuffix = "asd"
+$RootSuffix = "Resharper0"
+$UseEAP = $true
 $PluginId = "SamplePlugin.ReSharper"
 
 $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
-$OutputDirectory = "$PSScriptRoot\output"
-$NuGetFile = "$PSScriptRoot\..\tools\nuget.exe"
+
+# Determine download link
+if ($UseEAP) {
+	$ReleaseUrl = "https://data.services.jetbrains.com/products/releases?code=RSU&type=eap"
+} else {
+	$ReleaseUrl = "https://data.services.jetbrains.com/products/releases?code=RSU&type=release"
+}
+$DownloadLink = [uri] $(Invoke-WebRequest -UseBasicParsing $ReleaseUrl | ConvertFrom-Json).RSU[0].downloads.windows.link
+
+# Download installer
+$InstallerFile = "$PSScriptRoot\installer\$($DownloadLink.segments[-1])"
+if (!(Test-Path $InstallerFile)) {
+	mkdir -Force $(Split-Path $InstallerFile -Parent) > $null
+	Write-Output "Downloading from $DownloadLink"
+	(New-Object System.Net.WebClient).DownloadFile($DownloadLink, $InstallerFile)
+} else {
+	Write-Output "Using $($DownloadLink.segments[-1]) from cache"
+}
+
+# Execute installer
+Write-Output "Installing experimental hive"
+& $InstallerFile "/VsVersion=15.0" "/SpecificProductNames=ReSharper" "/Hive=$RootSuffix" "/Silent=True" | Out-Null
+
 $PluginRepository = "$env:LOCALAPPDATA\JetBrains\plugins"
 $InstallationDirectory = $(Get-ChildItem "$env:APPDATA\JetBrains\ReSharperPlatformVs*\v*_*$RootSuffix\NuGet.Config").Directory
 
@@ -25,16 +47,23 @@ if ($null -eq $PackagesXml.SelectSingleNode(".//package[@id='$PluginId']/@id")) 
     $PackagesXml.Save("$InstallationDirectory\packages.config")
 }
 
-# Adapt project file
+# Adapt user project file
 $HostIdentifier = "$($InstallationDirectory.Parent.Name)_$($InstallationDirectory.Name.Split('_')[-1])"
-$ProjectXmlFile = "$PSScriptRoot\src\SamplePlugin.ReSharper\SamplePlugin.ReSharper.csproj.user"
+$UserProjectXmlFile = "$PSScriptRoot\src\SamplePlugin.ReSharper\SamplePlugin.ReSharper.csproj.user"
 
-$ProjectXml = [xml] (Get-Content "$ProjectXmlFile")
+if (!(Test-Path "$UserProjectXmlFile")) {
+    Set-Content -Path "$UserProjectXmlFile" -Value "<Project><PropertyGroup><HostFullIdentifier></HostFullIdentifier></PropertyGroup></Project>"
+}
+
+$ProjectXml = [xml] (Get-Content "$UserProjectXmlFile")
 $HostIdentifierNode = $ProjectXml.SelectSingleNode(".//HostFullIdentifier")
 $HostIdentifierNode.InnerText = $HostIdentifier
-$ProjectXml.Save("$ProjectXmlFile")
+$ProjectXml.Save("$UserProjectXmlFile")
 
 # Install plugin
+$OutputDirectory = "$PSScriptRoot\output"
+$NuGetFile = "$PSScriptRoot\..\tools\nuget.exe"
+
 & dotnet pack SamplePlugin.sln --output "$OutputDirectory"
 & "$NuGetFile" install SamplePlugin.ReSharper -OutputDirectory "$PluginRepository" -Source "$OutputDirectory" -DependencyVersion Ignore
-# ./install-hive.ps1
+& "$InstallerFile" "/VsVersion=15.0" "/SpecificProductNames=ReSharper" "/Hive=$RootSuffix" "/Silent=True" | Out-Null
