@@ -15,7 +15,7 @@ $OutputDirectory = "$PSScriptRoot\output"
 # ReSharper
 Remove-Item $OutputDirectory -Force -Recurse
 & dotnet pack SamplePlugin.sln /p:PackageVersion=$Version --configuration $Configuration --output $OutputDirectory
-$ReSharperPackageFile = Get-ChildItem "$OutputDirectory\SamplePlugin.ReSharper.*.nupkg"
+$ReSharperPackageFile = Get-ChildItem "$OutputDirectory\ReSharper.SamplePlugin.*.nupkg"
 
 # Rider
 $RiderOutputDirectory = "$OutputDirectory\rider-SamplePlugin"
@@ -25,7 +25,7 @@ $RiderPluginId = $RiderPluginXml."idea-plugin".id
 # Rider :: dotnet
 mkdir "$RiderOutputDirectory" > $null
 mkdir "$RiderOutputDirectory\dotnet" > $null
-Copy-Item -Path "$PSScriptRoot\src\SamplePlugin.ReSharper\bin\SamplePlugin.Rider\$Configuration\SamplePlugin.Rider.*" -Destination "$RiderOutputDirectory\dotnet"
+Copy-Item -Path "$PSScriptRoot\src\ReSharper.SamplePlugin\bin\ReSharper.SamplePlugin.Rider\$Configuration\ReSharper.SamplePlugin.Rider.*" -Destination "$RiderOutputDirectory\dotnet"
 
 # Rider :: idea
 $WaveSpec = ([xml] (Get-Content "$PSScriptRoot\src\Versions.props")).Project.PropertyGroup.SdkVersion

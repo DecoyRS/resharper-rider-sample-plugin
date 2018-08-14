@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamplePlugin.ReSharper", "src\SamplePlugin.ReSharper\SamplePlugin.ReSharper.csproj", "{05608FE6-4FD1-4E9D-9BE2-B13A0E370BA2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReSharper.SamplePlugin", "src\ReSharper.SamplePlugin\ReSharper.SamplePlugin.csproj", "{05608FE6-4FD1-4E9D-9BE2-B13A0E370BA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamplePlugin.Rider", "src\SamplePlugin.ReSharper\SamplePlugin.Rider.csproj", "{084172D1-A9C6-46D0-96AD-05C5B09A5E5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReSharper.SamplePlugin.Rider", "src\ReSharper.SamplePlugin\ReSharper.SamplePlugin.Rider.csproj", "{084172D1-A9C6-46D0-96AD-05C5B09A5E5D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

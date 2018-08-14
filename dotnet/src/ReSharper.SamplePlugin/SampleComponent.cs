@@ -1,17 +1,19 @@
-﻿using JetBrains.ProjectModel;
-using JetBrains.ReSharper.Psi;
+﻿using System.Diagnostics;
+using JetBrains.ProjectModel;
+
 #if RIDER
 using JetBrains.ReSharper.Host.Features;
 using JetBrains.Rider.Model;
 #endif
 
-namespace SamplePlugin.ReSharper
+namespace ReSharper.SamplePlugin
 {
-    [PsiComponent]
+    [SolutionComponent]
     public class SampleComponent
     {
-        public void DoSomething(ISolution solution)
+        public SampleComponent(ISolution solution)
         {
+            Debugger.Launch();
 #if RESHARPER
 #elif RIDER
             var myRiderModel = solution.GetProtocolSolution().GetSampleModel();

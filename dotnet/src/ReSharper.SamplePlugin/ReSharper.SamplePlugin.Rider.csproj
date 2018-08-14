@@ -4,7 +4,7 @@
     <IsPackable>true</IsPackable>
     <TargetFramework>net461</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <RootNamespace>SamplePlugin.ReSharper</RootNamespace>
+    <RootNamespace>ReSharper.SamplePlugin</RootNamespace>
     <DefineConstants>$(DefineConstants);RIDER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>

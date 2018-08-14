@@ -16,6 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="RiderModel\*.cs" />
-    <Content Include="bin\SamplePlugin.ReSharper\$(Configuration)\SamplePlugin.ReSharper.*" PackagePath="dotFiles" Pack="true" />
+    <Content Include="bin\ReSharper.SamplePlugin\$(Configuration)\SamplePlugin.SamplePlugin.*" PackagePath="dotFiles" Pack="true" />
   </ItemGroup>
 </Project>

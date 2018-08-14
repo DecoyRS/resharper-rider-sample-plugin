@@ -2,7 +2,6 @@
   <PropertyGroup>
     <BaseIntermediateOutputPath>obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <DefaultItemExcludes>$(DefaultItemExcludes);obj\**</DefaultItemExcludes>
-    <RootNamespace>ReSharper.SamplePlugin</RootNamespace>
     <OutputPath>bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
     <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
