@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Versions.props" />
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <TargetFramework>net461</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <RootNamespace>SamplePlugin.ReSharper</RootNamespace>
+    <DefineConstants>$(DefineConstants);RIDER</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Rider.SDK" Version="$(SdkVersion)">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Wave" Version="$(WaveVersion)" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Versions.props" />
+  <PropertyGroup>
+    <IsPackable>True</IsPackable>
+    <TargetFramework>net461</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DefineConstants>$(DefineConstants);RESHARPER</DefineConstants>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="JetBrains.ReSharper.SDK" Version="$(SdkVersion)">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <!-- TODO: https://github.com/NuGet/Home/issues/7154 -->
+    <PackageReference Include="Wave" Version="$(WaveVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="RiderModel\*.cs" />
+    <Content Include="bin\SamplePlugin.ReSharper\$(Configuration)\SamplePlugin.ReSharper.*" PackagePath="dotFiles" Pack="true" />
+  </ItemGroup>
+</Project>
