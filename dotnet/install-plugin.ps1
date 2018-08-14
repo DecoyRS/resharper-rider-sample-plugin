@@ -1,8 +1,18 @@
-$RootSuffix = "Resharper0"
-$UseEAP = $true
+Param(
+    [Parameter(Mandatory=$true)]
+    $RootSuffix,
+    $Version = "1.0.0"
+)
+
+$UseEAP = $false
 $PluginId = "SamplePlugin.ReSharper"
 
 $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
+
+function ExecSafe([scriptblock] $cmd) {
+    & $cmd
+    if ($LastExitCode -ne 0) { throw "The following call failed with exit code $LastExitCode. '$cmd'" }
+}
 
 # Determine download link
 if ($UseEAP) {
@@ -24,7 +34,7 @@ if (!(Test-Path $InstallerFile)) {
 
 # Execute installer
 Write-Output "Installing experimental hive"
-& $InstallerFile "/VsVersion=15.0" "/SpecificProductNames=ReSharper" "/Hive=$RootSuffix" "/Silent=True" | Out-Null
+ExecSafe { & $InstallerFile "/VsVersion=15.0" "/SpecificProductNames=ReSharper" "/Hive=$RootSuffix" "/Silent=True" | Out-Null }
 
 $PluginRepository = "$env:LOCALAPPDATA\JetBrains\plugins"
 $InstallationDirectory = $(Get-ChildItem "$env:APPDATA\JetBrains\ReSharperPlatformVs*\v*_*$RootSuffix\NuGet.Config").Directory
@@ -47,9 +57,19 @@ if ($null -eq $PackagesXml.SelectSingleNode(".//package[@id='$PluginId']/@id")) 
     $PackagesXml.Save("$InstallationDirectory\packages.config")
 }
 
+# Install plugin
+$OutputDirectory = "$PSScriptRoot\output"
+$NuGetFile = "$PSScriptRoot\..\tools\nuget.exe"
+
+ExecSafe { & dotnet pack SamplePlugin.sln /p:PackageVersion=$Version --output "$OutputDirectory" }
+ExecSafe { & "$NuGetFile" install SamplePlugin.ReSharper -OutputDirectory "$PluginRepository" -Source "$OutputDirectory" -DependencyVersion Ignore }
+
+Write-Output "Re-installing experimental hive"
+ExecSafe { & "$InstallerFile" "/VsVersion=15.0" "/SpecificProductNames=ReSharper" "/Hive=$RootSuffix" "/Silent=True" | Out-Null }
+
 # Adapt user project file
 $HostIdentifier = "$($InstallationDirectory.Parent.Name)_$($InstallationDirectory.Name.Split('_')[-1])"
-$UserProjectXmlFile = "$PSScriptRoot\src\SamplePlugin.ReSharper\SamplePlugin.ReSharper.csproj.user"
+$UserProjectXmlFile = "$PSScriptRoot\src\$PluginId\$PluginId.csproj.user"
 
 if (!(Test-Path "$UserProjectXmlFile")) {
     Set-Content -Path "$UserProjectXmlFile" -Value "<Project><PropertyGroup><HostFullIdentifier></HostFullIdentifier></PropertyGroup></Project>"
@@ -59,11 +79,3 @@ $ProjectXml = [xml] (Get-Content "$UserProjectXmlFile")
 $HostIdentifierNode = $ProjectXml.SelectSingleNode(".//HostFullIdentifier")
 $HostIdentifierNode.InnerText = $HostIdentifier
 $ProjectXml.Save("$UserProjectXmlFile")
-
-# Install plugin
-$OutputDirectory = "$PSScriptRoot\output"
-$NuGetFile = "$PSScriptRoot\..\tools\nuget.exe"
-
-& dotnet pack SamplePlugin.sln --output "$OutputDirectory"
-& "$NuGetFile" install SamplePlugin.ReSharper -OutputDirectory "$PluginRepository" -Source "$OutputDirectory" -DependencyVersion Ignore
-& "$InstallerFile" "/VsVersion=15.0" "/SpecificProductNames=ReSharper" "/Hive=$RootSuffix" "/Silent=True" | Out-Null
