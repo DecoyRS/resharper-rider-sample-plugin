@@ -27,17 +27,12 @@ if ($null -eq $PackagesXml.SelectSingleNode(".//package[@id='$PluginId']/@id")) 
 
 # Adapt project file
 $HostIdentifier = "$($InstallationDirectory.Parent.Name)_$($InstallationDirectory.Name.Split('_')[-1])"
-$ProjectXmlFile = "$PSScriptRoot\src\SamplePlugin.ReSharper.csproj"
-$ProjectXml = [xml] (Get-Content "$ProjectXmlFile")
-if ($null -eq $ProjectXml.SelectSingleNode(".//HostFullIdentifier")) {
-    $HostIdentifierNode = $PackagesXml.CreateElement('package')
-    $HostIdentifierNode.InnerText = $HostIdentifier
+$ProjectXmlFile = "$PSScriptRoot\src\SamplePlugin.ReSharper\SamplePlugin.ReSharper.csproj.user"
 
-    $PackagesNode = $PackagesXml.SelectNodes("//PropertyGroup")[0]
-    $PackagesNode.AppendChild($HostIdentifierNode)
-    
-    $ProjectXml.Save("$ProjectXmlFile")
-}
+$ProjectXml = [xml] (Get-Content "$ProjectXmlFile")
+$HostIdentifierNode = $ProjectXml.SelectSingleNode(".//HostFullIdentifier")
+$HostIdentifierNode.InnerText = $HostIdentifier
+$ProjectXml.Save("$ProjectXmlFile")
 
 # Install plugin
 & dotnet pack SamplePlugin.sln --output "$OutputDirectory"
