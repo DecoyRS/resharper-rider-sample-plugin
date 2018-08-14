@@ -14,7 +14,7 @@ $OutputDirectory = "$PSScriptRoot\output"
 
 # ReSharper
 Remove-Item $OutputDirectory -Force -Recurse
-& dotnet pack SamplePlugin.sln /p:PackageVersion=$Version --configuration $Configuration --output $OutputDirectory # --NoPackageAnalysis
+& dotnet pack SamplePlugin.sln /p:PackageVersion=$Version --configuration $Configuration --output $OutputDirectory
 $ReSharperPackageFile = Get-ChildItem "$OutputDirectory\SamplePlugin.ReSharper.*.nupkg"
 
 # Rider
