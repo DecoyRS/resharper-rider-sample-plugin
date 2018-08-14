@@ -4,7 +4,7 @@ Param(
     $Version = "1.0.0"
 )
 
-$UseEAP = $false
+$UseEAP = $true
 $PluginId = "ReSharper.SamplePlugin"
 
 $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
@@ -61,7 +61,7 @@ if ($null -eq $PackagesXml.SelectSingleNode(".//package[@id='$PluginId']/@id")) 
 $OutputDirectory = "$PSScriptRoot\output"
 $NuGetFile = "$PSScriptRoot\..\tools\nuget.exe"
 
-ExecSafe { & dotnet pack SamplePlugin.sln /p:PackageVersion=$Version --output "$OutputDirectory" }
+ExecSafe { & dotnet pack SamplePlugin.sln /p:PackageVersion=$Version /p:HostFullIdentifier="" --output "$OutputDirectory" }
 ExecSafe { & "$NuGetFile" install $PluginId -OutputDirectory "$PluginRepository" -Source "$OutputDirectory" -DependencyVersion Ignore }
 
 Write-Output "Re-installing experimental hive"
